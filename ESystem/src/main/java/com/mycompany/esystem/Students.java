@@ -23,9 +23,9 @@ public class Students extends ESystem{
         DBConnect();
     }
     
-    public void SaveRecord(int id, String name, String add, String contact, String gender, String yrlvl){
+    public void SaveRecord(String name, String add, String contact, String gender, String yrlvl){
         ESystem save = new ESystem();
-        String query = "insert into Students values(" + id + ",'" + name + "','" + add + "','" + contact + "','" + gender + "','" + yrlvl + "');";
+        String query = "insert into Students (studname, studadd, studcontact, studgender, studyrlvl) " + "values('" + name + "','" + add + "','" + contact + "','" + gender + "','" + yrlvl + "');";
         try {
             save.st.executeUpdate(query);
             System.out.println("Insert Success!");

@@ -92,6 +92,7 @@ public class TeacherGUI extends javax.swing.JFrame {
             }
         });
 
+        teachId.setEditable(false);
         teachId.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 teachIdActionPerformed(evt);

@@ -95,6 +95,7 @@ public class SubjectGUI extends javax.swing.JFrame {
             }
         });
 
+        subjId.setEditable(false);
         subjId.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 subjIdActionPerformed(evt);
@@ -302,7 +303,7 @@ public class SubjectGUI extends javax.swing.JFrame {
 
     private void SaveActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_SaveActionPerformed
         Subject sub = new Subject();
-        sub.SaveRecord(Integer.valueOf(subjId.getText()), subjCode.getText(), subjSched.getText(), Integer.valueOf(subjUnits.getText()), subjDesc.getText());
+        sub.SaveRecord(subjCode.getText(), subjSched.getText(), Integer.valueOf(subjUnits.getText()), subjDesc.getText());
         showRecords();
     }//GEN-LAST:event_SaveActionPerformed
 

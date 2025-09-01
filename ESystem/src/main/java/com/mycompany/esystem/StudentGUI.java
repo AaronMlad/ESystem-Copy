@@ -76,6 +76,7 @@ public class StudentGUI extends javax.swing.JFrame {
             }
         });
 
+        studId.setEditable(false);
         studId.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 studIdActionPerformed(evt);
@@ -373,7 +374,7 @@ public class StudentGUI extends javax.swing.JFrame {
 
     private void SaveActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_SaveActionPerformed
         Students save = new Students();
-        save.SaveRecord(Integer.valueOf(studId.getText()), studName.getText(), studAdd.getText(), studContact.getText(), studGender.getText(), studYrlvl.getText());
+        save.SaveRecord(studName.getText(), studAdd.getText(), studContact.getText(), studGender.getText(), studYrlvl.getText());
         showRecords();
     }//GEN-LAST:event_SaveActionPerformed
 

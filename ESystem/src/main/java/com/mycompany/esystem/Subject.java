@@ -15,9 +15,9 @@ public class Subject extends ESystem{
     int subjUnits;
     String subjDesc;
     
-    public void SaveRecord(int id, String code, String schedule, int units, String desc){
+    public void SaveRecord(String code, String schedule, int units, String desc){
         ESystem save = new ESystem();
-        String query = "insert into Subjects (subjid, subjcode, subjsched, subjunits, subjdesc)" + "values(" + id + ",'" + code + "','" + schedule + "','" + units + "','" + desc + "');";
+        String query = "insert into Subjects (subjcode, subjsched, subjunits, subjdesc)" + "values('" + code + "','" + schedule + "','" + units + "','" + desc + "');";
         try {
             save.st.executeUpdate(query);
             System.out.println("Insert Success!");
