@@ -20,15 +20,16 @@ public class Assign extends ESystem{
     }
     
     public String assignSubject(int tid) {
-        String checkQuery = "SELECT COUNT(*) FROM Assign WHERE subid = " + assignSubjId + 
-                           " AND tid = " + tid;
+        String checkQuery = "SELECT tid FROM Assign WHERE subid = " + assignSubjId;
         try {
             ESystem.rs = ESystem.st.executeQuery(checkQuery);
             
             if (ESystem.rs.next()) {
-                int count = ESystem.rs.getInt(1);
-                if (count > 0) {
-                    return "Subject already assigned to teacher";
+                int assignedTeacherId = ESystem.rs.getInt("tid");
+                if (assignedTeacherId == tid) {
+                    return "Subject is already assigned to this teacher";
+                } else {
+                    return "Subject is already assigned to another teacher";
                 }
             }
             

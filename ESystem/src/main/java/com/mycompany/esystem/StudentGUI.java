@@ -5,6 +5,10 @@
 package com.mycompany.esystem;
 
 import javax.swing.table.DefaultTableModel;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
+import java.sql.Statement;
 
 /**
  *
@@ -59,6 +63,10 @@ public class StudentGUI extends javax.swing.JFrame {
         jMenu4 = new javax.swing.JMenu();
         jMenuItem4 = new javax.swing.JMenuItem();
         jMenuItem5 = new javax.swing.JMenuItem();
+        jMenu2 = new javax.swing.JMenu();
+        firstSem = new javax.swing.JMenuItem();
+        secondSem = new javax.swing.JMenuItem();
+        summer = new javax.swing.JMenuItem();
         jMenu5 = new javax.swing.JMenu();
 
         jMenu1.setText("jMenu1");
@@ -233,6 +241,34 @@ public class StudentGUI extends javax.swing.JFrame {
         jMenu4.add(jMenuItem5);
 
         jMenuBar2.add(jMenu4);
+
+        jMenu2.setText("Database");
+
+        firstSem.setText("1st Semester");
+        firstSem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                firstSemActionPerformed(evt);
+            }
+        });
+        jMenu2.add(firstSem);
+
+        secondSem.setText("2nd Semester");
+        secondSem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                secondSemActionPerformed(evt);
+            }
+        });
+        jMenu2.add(secondSem);
+
+        summer.setText("Summer");
+        summer.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                summerActionPerformed(evt);
+            }
+        });
+        jMenu2.add(summer);
+
+        jMenuBar2.add(jMenu2);
 
         jMenu5.setText("Edit");
         jMenuBar2.add(jMenu5);
@@ -486,6 +522,18 @@ public class StudentGUI extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_enrollTableMouseClicked
 
+    private void firstSemActionPerformed(java.awt.event.ActionEvent evt) {
+        createDatabase("1stSem");
+    }
+
+private void secondSemActionPerformed(java.awt.event.ActionEvent evt) {
+        createDatabase("2ndSem");
+    }
+
+    private void summerActionPerformed(java.awt.event.ActionEvent evt) {
+        createDatabase("summer");
+    }
+
         public void showRecords() {
         DefaultTableModel tblmodel = (DefaultTableModel) studTable.getModel();
         tblmodel.setRowCount(0);
@@ -549,6 +597,135 @@ public class StudentGUI extends javax.swing.JFrame {
     }
         
         
+    private void createDatabase(String semester) {
+        try {
+            // Get current year and next year for the database name
+            int currentYear = java.time.Year.now().getValue();
+            String dbName = String.format("%s_sy%d_%d", semester, currentYear, currentYear + 1);
+            
+            // Connect to MySQL without specifying a database
+            String url = "jdbc:mysql://10.4.44.171:3306/";
+            String user = "root";
+            String password = "stoic";
+            
+            try (Connection conn = DriverManager.getConnection(url, user, password);
+                 Statement stmt = conn.createStatement()) {
+                
+                // Create the database if it doesn't exist
+                String createDbSql = String.format("CREATE DATABASE IF NOT EXISTS `%s`;", dbName);
+                stmt.executeUpdate(createDbSql);
+                
+                // Use the new database
+                stmt.executeUpdate("USE `" + dbName + "`");
+                
+                // Create Students table
+                String createStudentsTable = "CREATE TABLE IF NOT EXISTS Students (" +
+                    "studid INT PRIMARY KEY AUTO_INCREMENT, " +
+                    "studname TEXT NOT NULL, " +
+                    "studadd TEXT, " +
+                    "studcontact TEXT, " +
+                    "studgender TEXT, " +
+                    "studyrlvl TEXT" +
+                    ");";
+                
+                // Create Subjects table
+                String createSubjectsTable = "CREATE TABLE IF NOT EXISTS Subjects (" +
+                    "subjid INT PRIMARY KEY AUTO_INCREMENT, " +
+                    "subjcode TEXT NOT NULL, " +
+                    "subjdesc TEXT, " +
+                    "subjunits INT, " +
+                    "subjsched TEXT" +
+                    ");";
+                
+                // Create Enroll table
+                String createEnrollTable = "CREATE TABLE IF NOT EXISTS Enroll (" +
+                    "eid INT PRIMARY KEY AUTO_INCREMENT, " +
+                    "studid INT, " +
+                    "subjid INT, " +
+                    "FOREIGN KEY (studid) REFERENCES Students(studid) ON DELETE CASCADE, " +
+                    "FOREIGN KEY (subjid) REFERENCES Subjects(subjid) ON DELETE CASCADE" +
+                    ");";
+                
+                // Create Grades table
+                String createGradesTable = "CREATE TABLE IF NOT EXISTS Grades (" +
+                    "GradeID INT PRIMARY KEY AUTO_INCREMENT, " +
+                    "eid INT, " +
+                    "Prelim TEXT, " +
+                    "Midterm TEXT, " +
+                    "Prefinal TEXT, " +
+                    "Final TEXT, " +
+                    "FOREIGN KEY (eid) REFERENCES Enroll(eid) ON DELETE CASCADE" +
+                    ");";
+                
+                // Create Teachers table
+                String createTeachersTable = "CREATE TABLE IF NOT EXISTS Teachers (" +
+                    "tid INT PRIMARY KEY AUTO_INCREMENT, " +
+                    "tname TEXT NOT NULL, " +
+                    "tdept TEXT, " +
+                    "tadd TEXT, " +
+                    "tcontact TEXT, " +
+                    "tstatus TEXT" +
+                    ");";
+                
+                // Create Assign table
+                String createAssignTable = "CREATE TABLE IF NOT EXISTS Assign (" +
+                    "tid INT, " +
+                    "subjid INT, " +
+                    "PRIMARY KEY (tid, subjid), " +
+                    "FOREIGN KEY (tid) REFERENCES Teachers(tid) ON DELETE CASCADE, " +
+                    "FOREIGN KEY (subjid) REFERENCES Subjects(subjid) ON DELETE CASCADE" +
+                    ");";
+                
+                // Create TransactionCharges table
+                String createTransactionChargesTable = "CREATE TABLE IF NOT EXISTS TransactionCharges (" +
+                    "TransID INT PRIMARY KEY AUTO_INCREMENT, " +
+                    "Department TEXT, " +
+                    "SubjUnits DECIMAL(10,2), " +
+                    "Insurance DECIMAL(10,2), " +
+                    "Computer DECIMAL(10,2), " +
+                    "Laboratory DECIMAL(10,2), " +
+                    "Cultural DECIMAL(10,2), " +
+                    "Library DECIMAL(10,2), " +
+                    "Facility DECIMAL(10,2)" +
+                    ");";
+                
+                // Create Invoice table
+                String createInvoiceTable = "CREATE TABLE IF NOT EXISTS Invoice (" +
+                    "Invoicenum INT PRIMARY KEY AUTO_INCREMENT, " +
+                    "studid INT, " +
+                    "TransID INT, " +
+                    "FOREIGN KEY (studid) REFERENCES Students(studid) ON DELETE CASCADE, " +
+                    "FOREIGN KEY (TransID) REFERENCES TransactionCharges(TransID) ON DELETE CASCADE" +
+                    ");";
+                
+                // Execute all table creation statements
+                stmt.executeUpdate(createStudentsTable);
+                stmt.executeUpdate(createSubjectsTable);
+                stmt.executeUpdate(createEnrollTable);
+                stmt.executeUpdate(createGradesTable);
+                stmt.executeUpdate(createTeachersTable);
+                stmt.executeUpdate(createAssignTable);
+                stmt.executeUpdate(createTransactionChargesTable);
+                stmt.executeUpdate(createInvoiceTable);
+                
+                javax.swing.JOptionPane.showMessageDialog(this, 
+                    String.format("Successfully created database '%s' with all required tables.", dbName));
+                
+            } catch (SQLException ex) {
+                javax.swing.JOptionPane.showMessageDialog(this, 
+                    "Error creating database: " + ex.getMessage(), 
+                    "Database Error", 
+                    javax.swing.JOptionPane.ERROR_MESSAGE);
+            }
+            
+        } catch (Exception ex) {
+            javax.swing.JOptionPane.showMessageDialog(this, 
+                "Error: " + ex.getMessage(), 
+                "Error", 
+                javax.swing.JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
     /**
      * @param args the command line arguments
      */
@@ -591,6 +768,7 @@ public class StudentGUI extends javax.swing.JFrame {
     private javax.swing.JButton drop;
     private javax.swing.JButton enroll;
     private javax.swing.JTable enrollTable;
+    private javax.swing.JMenuItem firstSem;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
@@ -600,6 +778,7 @@ public class StudentGUI extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel7;
     private javax.swing.JLabel jLabel8;
     private javax.swing.JMenu jMenu1;
+    private javax.swing.JMenu jMenu2;
     private javax.swing.JMenu jMenu4;
     private javax.swing.JMenu jMenu5;
     private javax.swing.JMenuBar jMenuBar2;
@@ -610,6 +789,7 @@ public class StudentGUI extends javax.swing.JFrame {
     private javax.swing.JMenuItem jMenuItem5;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
+    private javax.swing.JMenuItem secondSem;
     private javax.swing.JTextField studAdd;
     private javax.swing.JTextField studContact;
     private javax.swing.JTextField studGender;
@@ -617,5 +797,6 @@ public class StudentGUI extends javax.swing.JFrame {
     private javax.swing.JTextField studName;
     private javax.swing.JTable studTable;
     private javax.swing.JTextField studYrlvl;
+    private javax.swing.JMenuItem summer;
     // End of variables declaration//GEN-END:variables
 }
