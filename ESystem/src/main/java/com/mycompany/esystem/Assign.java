@@ -20,7 +20,7 @@ public class Assign extends ESystem{
     }
     
     public String assignSubject(int tid) {
-        String checkQuery = "SELECT tid FROM Assign WHERE subid = " + assignSubjId;
+        String checkQuery = "SELECT tid FROM Assign WHERE subjid = " + assignSubjId;
         try {
             ESystem.rs = ESystem.st.executeQuery(checkQuery);
             
@@ -33,7 +33,7 @@ public class Assign extends ESystem{
                 }
             }
             
-            String insertQuery = "INSERT INTO Assign (subid, tid) VALUES (" + 
+            String insertQuery = "INSERT INTO Assign (subjid, tid) VALUES (" + 
                                 assignSubjId + ", " + tid + ")";
             ESystem.st.executeUpdate(insertQuery);
             return "Subject assigned successfully";
@@ -44,7 +44,7 @@ public class Assign extends ESystem{
     }
     
     public String deleteSubject(int tid) {
-        String deleteQuery = "DELETE FROM Assign WHERE subid = " + assignSubjId + 
+        String deleteQuery = "DELETE FROM Assign WHERE subjid = " + assignSubjId + 
                            " AND tid = " + tid;
         try {
             int affectedRows = ESystem.st.executeUpdate(deleteQuery);

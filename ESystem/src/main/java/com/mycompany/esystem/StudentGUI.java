@@ -559,7 +559,7 @@ private void secondSemActionPerformed(java.awt.event.ActionEvent evt) {
     }
         
     private void showEnrollRec(){
-        DefaultTableModel model = (DefaultTableModel) enrollTable.getModel();
+    DefaultTableModel model = (DefaultTableModel) enrollTable.getModel();
     model.setRowCount(0);
     
     if (SubjectGUI.selectedStudentId == -1) {
@@ -591,9 +591,9 @@ private void secondSemActionPerformed(java.awt.event.ActionEvent evt) {
             });
         }
     } 
-    catch (Exception ex) { 
-        System.out.println("Error loading enrollment records: " + ex.getMessage());
-    }
+        catch (Exception ex) { 
+            System.out.println("Error loading enrollment records: " + ex.getMessage());
+        }
     }
         
         
@@ -603,7 +603,6 @@ private void secondSemActionPerformed(java.awt.event.ActionEvent evt) {
             int currentYear = java.time.Year.now().getValue();
             String dbName = String.format("%s_sy%d_%d", semester, currentYear, currentYear + 1);
             
-            // Connect to MySQL without specifying a database
             String url = "jdbc:mysql://10.4.44.171:3306/";
             String user = "root";
             String password = "stoic";
@@ -626,7 +625,7 @@ private void secondSemActionPerformed(java.awt.event.ActionEvent evt) {
                     "studcontact TEXT, " +
                     "studgender TEXT, " +
                     "studyrlvl TEXT" +
-                    ");";
+                    ") AUTO_INCREMENT = 1001;";
                 
                 // Create Subjects table
                 String createSubjectsTable = "CREATE TABLE IF NOT EXISTS Subjects (" +
@@ -635,7 +634,7 @@ private void secondSemActionPerformed(java.awt.event.ActionEvent evt) {
                     "subjdesc TEXT, " +
                     "subjunits INT, " +
                     "subjsched TEXT" +
-                    ");";
+                    ") AUTO_INCREMENT = 2001;";
                 
                 // Create Enroll table
                 String createEnrollTable = "CREATE TABLE IF NOT EXISTS Enroll (" +
@@ -643,18 +642,20 @@ private void secondSemActionPerformed(java.awt.event.ActionEvent evt) {
                     "studid INT, " +
                     "subjid INT, " +
                     "FOREIGN KEY (studid) REFERENCES Students(studid) ON DELETE CASCADE, " +
-                    "FOREIGN KEY (subjid) REFERENCES Subjects(subjid) ON DELETE CASCADE" +
+                    "FOREIGN KEY (subjid) REFERENCES Subjects(subjid) ON DELETE CASCADE, " +
+                    "UNIQUE KEY unique_enrollment (studid, subjid)" +
                     ");";
                 
                 // Create Grades table
-                String createGradesTable = "CREATE TABLE IF NOT EXISTS Grades (" +
-                    "GradeID INT PRIMARY KEY AUTO_INCREMENT, " +
-                    "eid INT, " +
-                    "Prelim TEXT, " +
-                    "Midterm TEXT, " +
-                    "Prefinal TEXT, " +
-                    "Final TEXT, " +
-                    "FOREIGN KEY (eid) REFERENCES Enroll(eid) ON DELETE CASCADE" +
+                String createGradesTable = "CREATE TABLE IF NOT EXISTS Grades (\n" +
+                    "GradeID INT PRIMARY KEY AUTO_INCREMENT, \n" +
+                    "eid INT UNIQUE, \n" +
+                    "Prelim TEXT, \n" +
+                    "Midterm TEXT, \n" +
+                    "Prefinal TEXT, \n" +
+                    "Final TEXT, \n" +
+                    "FOREIGN KEY (eid) REFERENCES Enroll(eid) ON DELETE CASCADE, \n" +
+                    "UNIQUE KEY unique_enrollment (eid)" +
                     ");";
                 
                 // Create Teachers table
@@ -665,7 +666,7 @@ private void secondSemActionPerformed(java.awt.event.ActionEvent evt) {
                     "tadd TEXT, " +
                     "tcontact TEXT, " +
                     "tstatus TEXT" +
-                    ");";
+                    ") AUTO_INCREMENT = 3001;";
                 
                 // Create Assign table
                 String createAssignTable = "CREATE TABLE IF NOT EXISTS Assign (" +

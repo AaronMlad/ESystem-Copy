@@ -479,7 +479,7 @@ public class TeacherGUI extends javax.swing.JFrame {
     show.DBConnect();
     try {
         String query = "SELECT * FROM Subjects " +
-                       "JOIN Assign ON Subjects.subjid = Assign.subid " +
+                       "JOIN Assign ON Subjects.subjid = Assign.subjid " +
                        "WHERE Assign.tid = " + SubjectGUI.selectedTeacherId;
         
         show.rs = show.st.executeQuery(query);
