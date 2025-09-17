@@ -4,9 +4,11 @@
  */
 package com.mycompany.esystem;
 
+import javax.swing.JOptionPane;
 import javax.swing.table.DefaultTableModel;
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
@@ -408,10 +410,52 @@ public class StudentGUI extends javax.swing.JFrame {
         // TODO add your handling code here:
     }//GEN-LAST:event_studYrlvlActionPerformed
 
-    private void SaveActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_SaveActionPerformed
-        Students save = new Students();
-        save.SaveRecord(studName.getText(), studAdd.getText(), studContact.getText(), studGender.getText(), studYrlvl.getText());
-        showRecords();
+    private void SaveActionPerformed(java.awt.event.ActionEvent evt) {
+        ESystem es = new ESystem();
+        try {
+            // First save the student record
+            Students save = new Students();
+            save.SaveRecord(studName.getText(), studAdd.getText(), studContact.getText(), 
+                          studGender.getText(), studYrlvl.getText());
+            
+            // Get the last inserted student ID
+            es.DBConnect();
+            ResultSet rs = es.st.executeQuery("SELECT LAST_INSERT_ID()");
+            int studentId = 0;
+            if (rs.next()) {
+                studentId = rs.getInt(1);
+                
+                // Create username and password
+                String name = studName.getText().replaceAll("\\s+", ""); // Remove spaces
+                String username = studentId + name;
+                String password = "AdDU" + name;
+                
+                // Create the database user with limited privileges
+                String createUserSQL = String.format(
+                    "CREATE USER '%s'@'%%' IDENTIFIED BY '%s';", 
+                    username, password);
+                
+                // Grant minimal required privileges
+                String grantSQL = String.format(
+                    "GRANT SELECT ON %s.* TO '%s'@'%%';", 
+                    ESystem.db, username);
+                
+                // Execute the SQL statements using the instance
+                es.st.executeUpdate(createUserSQL);
+                es.st.executeUpdate(grantSQL);
+                es.st.executeUpdate("FLUSH PRIVILEGES;");
+                
+                System.out.println("Created database user: " + username);
+            }
+            
+            showRecords();
+            
+        } catch (Exception ex) {
+            System.out.println("Error creating database user: " + ex.getMessage());
+            JOptionPane.showMessageDialog(this, 
+                "Student saved but there was an error creating database user: " + ex.getMessage(),
+                "Warning", JOptionPane.WARNING_MESSAGE);
+        }
     }//GEN-LAST:event_SaveActionPerformed
 
     private void SaveMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_SaveMouseClicked
@@ -526,7 +570,7 @@ public class StudentGUI extends javax.swing.JFrame {
         createDatabase("1stSem");
     }
 
-private void secondSemActionPerformed(java.awt.event.ActionEvent evt) {
+    private void secondSemActionPerformed(java.awt.event.ActionEvent evt) {
         createDatabase("2ndSem");
     }
 

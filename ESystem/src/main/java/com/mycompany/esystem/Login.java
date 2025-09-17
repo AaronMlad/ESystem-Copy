@@ -4,11 +4,19 @@
  */
 package com.mycompany.esystem;
 
+import java.sql.*;
+import javax.swing.JOptionPane;
+
 /**
  *
  * @author amalda
  */
 public class Login extends javax.swing.JFrame {
+    // Session state for two-step login
+    private boolean dbListLoaded = false;
+    private boolean submitListenerAttached = false;
+    private String sessionUsername;
+    private String sessionPassword;
 
     /**
      * Creates new form Login
@@ -26,21 +34,238 @@ public class Login extends javax.swing.JFrame {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
+        jLabel1 = new javax.swing.JLabel();
+        jLabel2 = new javax.swing.JLabel();
+        uname = new javax.swing.JTextField();
+        pswd = new javax.swing.JTextField();
+        loginUser = new javax.swing.JButton();
+        jLabel3 = new javax.swing.JLabel();
+        sySelection = new javax.swing.JComboBox<>();
+        submit = new javax.swing.JButton();
+        jLabel4 = new javax.swing.JLabel();
+
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+
+        jLabel1.setText("Username:");
+
+        jLabel2.setText("Password:");
+
+        uname.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                unameActionPerformed(evt);
+            }
+        });
+
+        loginUser.setText("Login");
+        loginUser.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                loginUserActionPerformed(evt);
+            }
+        });
+
+        jLabel3.setText("School Year:");
+
+        sySelection.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "School Year" }));
+        sySelection.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                sySelectionActionPerformed(evt);
+            }
+        });
+
+        submit.setText("Submit");
+
+        jLabel4.setFont(new java.awt.Font("Segoe UI", 1, 18)); // NOI18N
+        jLabel4.setForeground(new java.awt.Color(30, 0, 255));
+        jLabel4.setText("LOGIN FORM");
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 400, Short.MAX_VALUE)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                .addContainerGap(76, Short.MAX_VALUE)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addGroup(layout.createSequentialGroup()
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                            .addComponent(jLabel3)
+                            .addComponent(jLabel2))
+                        .addGap(18, 18, 18)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(submit)
+                            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                                .addComponent(loginUser)
+                                .addComponent(pswd)
+                                .addComponent(sySelection, 0, 160, Short.MAX_VALUE))))
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(jLabel1)
+                        .addGap(18, 18, 18)
+                        .addComponent(uname, javax.swing.GroupLayout.PREFERRED_SIZE, 160, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addGap(81, 81, 81))
+            .addGroup(layout.createSequentialGroup()
+                .addGap(143, 143, 143)
+                .addComponent(jLabel4)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 300, Short.MAX_VALUE)
+            .addGroup(layout.createSequentialGroup()
+                .addGap(15, 15, 15)
+                .addComponent(jLabel4)
+                .addGap(26, 26, 26)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(uname, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel1))
+                .addGap(18, 18, 18)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(pswd, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel2))
+                .addGap(18, 18, 18)
+                .addComponent(loginUser)
+                .addGap(37, 37, 37)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel3)
+                    .addComponent(sySelection, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(18, 18, 18)
+                .addComponent(submit)
+                .addContainerGap(33, Short.MAX_VALUE))
         );
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
+
+    private void unameActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_unameActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_unameActionPerformed
+
+    private void sySelectionActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_sySelectionActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_sySelectionActionPerformed
+
+    private boolean checkUserPrivileges(String username, String password) {
+        try {
+            // First try to connect to the database with provided credentials
+            Connection conn = DriverManager.getConnection("jdbc:mysql://10.4.44.171:3306/mysql?zeroDateTimeBehavior=convertToNull", 
+                    username, password);
+            
+            // Check for root privileges
+            Statement stmt = conn.createStatement();
+            ResultSet rs = stmt.executeQuery("SHOW GRANTS FOR CURRENT_USER");
+            
+            boolean hasAllPrivileges = false;
+            boolean hasInsert = false;
+            boolean hasUpdate = false;
+            boolean hasDelete = false;
+            boolean hasSelect = false;
+            
+            while (rs.next()) {
+                String grant = rs.getString(1).toUpperCase();
+                if (grant.contains("ALL PRIVILEGES") || 
+                   (grant.contains("GRANT OPTION") && grant.contains("ON *.*"))) {
+                    hasAllPrivileges = true;
+                    break;
+                }
+                if (grant.contains("INSERT")) hasInsert = true;
+                if (grant.contains("UPDATE")) hasUpdate = true;
+                if (grant.contains("DELETE")) hasDelete = true;
+                if (grant.contains("SELECT")) hasSelect = true;
+            }
+            
+            rs.close();
+            stmt.close();
+            conn.close();
+            
+            return hasAllPrivileges || (hasInsert && hasUpdate && hasDelete && hasSelect);
+            
+        } catch (SQLException e) {
+            return false;
+        }
+    }
+    
+    private void loginUserActionPerformed(java.awt.event.ActionEvent evt) {
+        String username = uname.getText();
+        String password = pswd.getText();
+        
+        if (username.isEmpty() || password.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Please enter both username and password");
+            return;
+        }
+        
+        try {
+            // Step 1: credential/privilege check
+            if (!dbListLoaded) {
+                if (checkUserPrivileges(username, password)) {
+                    // Hold credentials for step 2
+                    sessionUsername = username;
+                    sessionPassword = password;
+                    
+                    // Load available SY databases from server
+                    try (Connection conn = DriverManager.getConnection("jdbc:mysql://10.4.44.171:3306/?zeroDateTimeBehavior=convertToNull", 
+                                                                     sessionUsername, sessionPassword);
+                         Statement stmt = conn.createStatement();
+                         ResultSet rs = stmt.executeQuery("SHOW DATABASES")) {
+                        javax.swing.DefaultComboBoxModel<String> model = new javax.swing.DefaultComboBoxModel<>();
+                        String firstDb = null;
+                        
+                        // First pass: find all matching databases
+                        while (rs.next()) {
+                            String dbName = rs.getString(1);
+                            if (dbName != null && dbName.matches("^(1stSem|2ndSem|summer)_sy\\d{4}_\\d{4}$")) {
+                                model.addElement(dbName);
+                                // Prefer 1stSem as the default if available
+                                if (firstDb == null || dbName.startsWith("1stSem")) {
+                                    firstDb = dbName;
+                                }
+                            }
+                        }
+                        if (model.getSize() == 0) {
+                            JOptionPane.showMessageDialog(this, "No semester databases found. Please create a semester database first.");
+                            return;
+                        }
+                        
+                        sySelection.setModel(model);
+                        // Set the first (or 1stSem) database as selected
+                        if (firstDb != null) {
+                            sySelection.setSelectedItem(firstDb);
+                        } else {
+                            sySelection.setSelectedIndex(0);
+                        }
+                        
+                        dbListLoaded = true;
+                        JOptionPane.showMessageDialog(this, "Click Submit to continue with the selected database.");
+                    }
+                    
+                    // Attach submit listener only once
+                    if (!submitListenerAttached) {
+                        submit.addActionListener(e -> {
+                            Object sel = sySelection.getSelectedItem();
+                            if (sel == null) {
+                                // This case should never happen since we have at least one database
+                                JOptionPane.showMessageDialog(this, "No database selected");
+                                return;
+                            }
+                            String selectedDb = sel.toString();
+                            // Configure global connection settings
+                            ESystem.setDatabaseCredentials(selectedDb, sessionUsername, sessionPassword);
+                            // Proceed to Student GUI
+                            StudentGUI studentGUI = new StudentGUI();
+                            studentGUI.setVisible(true);
+                            this.dispose();
+                        });
+                        submitListenerAttached = true;
+                    }
+                } else {
+                    JOptionPane.showMessageDialog(this, "Invalid credentials or insufficient privileges");
+                }
+                return; // End step 1
+            }
+            
+            // If db list is already loaded and user presses Login again, just remind to use Submit
+            JOptionPane.showMessageDialog(this, "Database list already loaded. Please select a database and click Submit.");
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, "Login failed: " + e.getMessage(), 
+                "Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }
 
     /**
      * @param args the command line arguments
@@ -78,5 +303,14 @@ public class Login extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JLabel jLabel1;
+    private javax.swing.JLabel jLabel2;
+    private javax.swing.JLabel jLabel3;
+    private javax.swing.JLabel jLabel4;
+    private javax.swing.JButton loginUser;
+    private javax.swing.JTextField pswd;
+    private javax.swing.JButton submit;
+    private javax.swing.JComboBox<String> sySelection;
+    private javax.swing.JTextField uname;
     // End of variables declaration//GEN-END:variables
 }

@@ -17,20 +17,27 @@ public class ESystem {
     static Statement st;
     static ResultSet rs;
     
-    static String db;
-    static String uname;
-    static String pswd;
+    public static String db;
+    public static String uname;
+    public static String pswd;
+    
+    public static void setDatabaseCredentials(String dbName, String username, String password) {
+        db = dbName;
+        uname = username;
+        pswd = password;
+    }
     
     public static void main(String[] args) {
         //DBConnect();
-        StudentGUI form = new StudentGUI();
+        Login form = new Login();
         form.setVisible(true);
     }
     public void DBConnect() {
         try {
-        db = "1stSem_sy2025_2026";
-        uname = "root";
-        pswd = "stoic";
+        // Expect that db, uname, pswd have been set via setDatabaseCredentials()
+        if (db == null || uname == null || pswd == null) {
+            throw new IllegalStateException("Database credentials not set. Please login and select a database first.");
+        }
         
         Class.forName("com.mysql.cj.jdbc.Driver");
         con = DriverManager.getConnection("jdbc:mysql://10.4.44.171:3306/"+ db +"?zeroDateTimeBehavior=convertToNull", uname, pswd);
